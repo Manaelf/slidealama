@@ -8,8 +8,8 @@ public class Field {
     private final BlockType[][] grid;
     private GameState state;
 
-    private int scoreP1 = 0;
-    private int scoreP2 = 0;
+    private final int scoreP1 = 0;
+    private final int scoreP2 = 0;
 
     public Field(int rowCount, int columnCount) {
         this.rowCount = rowCount;
@@ -19,30 +19,29 @@ public class Field {
         generate();
     }
 
-    // 1. Generovanie poľa bez počiatočných kombinácií „3 v rade“
+    // 1. Generating game field without combination 3 in a row
     private void generate() {
         for (int r = 0; r < rowCount; r++) {
             for (int c = 0; c < columnCount; c++) {
                 BlockType type;
                 do {
                     type = BlockType.getRandom();
-                } while (isCreatingMatch(r, c, type)); // Kontrola, aby nebolo hneď 3 v rade
+                } while (isCreatingMatch(r, c, type)); // Check that there aren't three in a row
                 grid[r][c] = type;
             }
         }
     }
 
-    // Pomocná metóda: kontroluje, či nový blok nevytvorí kombináciu pri generovaní.
+    // Auxiliary method: checks whether the new block will create a combination during generation.
     private boolean isCreatingMatch(int row, int col, BlockType type) {
         if (row >= 2 && grid[row-1][col] == type && grid[row-2][col] == type) return true;
         if (col >= 2 && grid[row][col-1] == type && grid[row][col-2] == type) return true;
         return false;
     }
 
-    // 2. Проверка состояния игры (Завершена ли она?)
-    // В Slide A Lama игра обычно идет до определенного счета или пока есть ходы
+    // 2. Checking the status of the game (Is it finished?)
     public boolean isGameOver() {
-        // Условие: например, кто-то набрал 500 очков (упрощенно)
+        // Condition: someone has scored 500 points (simplified)
         if (scoreP1 >= 500 || scoreP2 >= 500) {
             state = GameState.FINISHED;
             return true;
