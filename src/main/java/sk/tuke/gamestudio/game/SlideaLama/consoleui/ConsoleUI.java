@@ -4,61 +4,63 @@ import sk.tuke.gamestudio.game.SlideaLama.core.Field;
 import sk.tuke.gamestudio.game.SlideaLama.core.BlockType;
 import sk.tuke.gamestudio.game.SlideaLama.core.GameState;
 
-import java.util.Scanner;
-
 public class ConsoleUI {
     private final Field field;
-    private final Scanner scanner = new Scanner(System.in);
+    private final java.util.Scanner scanner = new java.util.Scanner(System.in);
 
-    public ConsoleUI(Field field){
+    public ConsoleUI(Field field) {
         this.field = field;
     }
-    public void play(){
-        System.out.println("--- Welcome to Slide A Lama Game ---");
 
-        while (field.getState() != GameState.FINISHED) {
+    public void play() {
+        while (!field.isGameOver()) {
             show();
             handleInput();
         }
-
-        System.out.println("Game Over!");
-        System.out.println("Score Player1: " + field.getScoreP1());
-        System.out.println("Score Player2: " + field.getScoreP2());
     }
-    public void show(){
-        System.out.println("\nCurrent score: P1 [" + field.getScoreP1() + "] | P2 |" + field.getScoreP2() + "]");
-        System.out.println("Move: " + field.getState());
-        System.out.println("-------------------------");
-        for (int row = 0; row<5; row++){
-            System.out.print("| ");
-            for(int column = 0; column < 5; column++){
-                System.out.print(getSymbol(field.getBlock(row,column)) + " | ");
+
+    public void show() {
+        System.out.println("\n========================================");
+        System.out.println("Score: P1 [" + field.getScoreP1() + "] | P2 [" + field.getScoreP2() + "]");
+        System.out.println("Current move: " + field.getState());
+        System.out.println("Next Block: [" + getSymbol(field.getNextBlock()) + "]");
+        System.out.println("========================================");
+
+
+        System.out.println("    1   2   3   4   5");
+        System.out.println("  ---------------------");
+        for (int r = 0; r < 5; r++) {
+            System.out.print((r + 1) + " | ");
+            for (int c = 0; c < 5; c++) {
+                System.out.print(getSymbol(field.getBlock(r, c)) + " | ");
             }
-            System.out.println(" ");
+            System.out.println();
         }
-        System.out.println("-------------------------");
-        System.out.println("Введите команду (например: 'top 2' или 'exit'):");
+        System.out.println("  ---------------------");
+        System.out.println("Enter the command (t1-5, l1-5, r1-5):");
     }
+
     private void handleInput() {
-        String input = scanner.nextLine().toLowerCase();
+        String input = scanner.nextLine().toLowerCase().trim();
 
-        if (input.equals("exit")) {
+        if (input.matches("[tlr][1-5]")) {
+            field.pushBlock(input);
+        } else if (input.equals("exit")) {
             System.exit(0);
+        } else {
+            System.out.println("!!! Error, enter the correct command (for example, t2) !!!");
         }
-
-        // Пока мы не написали метод pushBlock, просто имитируем чтение
-        System.out.println("> Вы ввели: " + input + " (Логика сдвига будет в следующем шаге)");
     }
+
     private String getSymbol(BlockType type) {
+        if (type == null) return " ";
         switch (type) {
             case LAMA:  return "L";
             case SUN:   return "S";
             case MOON:  return "M";
             case FRUIT: return "F";
             case SNAKE: return "X";
-            default:    return " ";
+            default:    return "?";
         }
     }
 }
-
-

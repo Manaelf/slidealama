@@ -7,41 +7,136 @@ public class Field {
     private final int columnCount;
     private final BlockType[][] grid;
     private GameState state;
+    private BlockType nextBlock;
 
-    private final int scoreP1 = 0;
-    private final int scoreP2 = 0;
+    private int scoreP1 = 0;
+    private int scoreP2 = 0;
 
     public Field(int rowCount, int columnCount) {
         this.rowCount = rowCount;
         this.columnCount = columnCount;
         this.grid = new BlockType[rowCount][columnCount];
         this.state = GameState.PLAYER1_TURN;
+        this.nextBlock = BlockType.getRandom();
         generate();
     }
 
-    // 1. Generating game field without combination 3 in a row
     private void generate() {
         for (int r = 0; r < rowCount; r++) {
             for (int c = 0; c < columnCount; c++) {
+                // For testing firts to rows generating empty
+                if (r < 2) {
+                    grid[r][c] = null;
+                    continue;
+                }
+
                 BlockType type;
                 do {
                     type = BlockType.getRandom();
-                } while (isCreatingMatch(r, c, type)); // Check that there aren't three in a row
+                } while (isCreatingMatch(r, c, type));
                 grid[r][c] = type;
             }
         }
     }
 
-    // Auxiliary method: checks whether the new block will create a combination during generation.
+    public void pushBlock(String command) {
+        char dirChar = command.charAt(0);
+        int index = Character.getNumericValue(command.charAt(1)) - 1;
+
+        if (dirChar == 't') shiftVertical(index);
+        else if (dirChar == 'l') shiftHorizontal(index, true);
+        else if (dirChar == 'r') shiftHorizontal(index, false);
+
+        this.nextBlock = BlockType.getRandom();
+        this.state = (state == GameState.PLAYER1_TURN) ? GameState.PLAYER2_TURN : GameState.PLAYER1_TURN;
+
+        applyGravity();
+    }
+
+    private void shiftVertical(int col) {
+        // Find the first empty cell from top to bottom
+        int emptyIndex = -1;
+        for (int r = 0; r < rowCount; r++) {
+            if (grid[r][col] == null) {
+                emptyIndex = r;
+                break;
+            }
+        }
+
+        if (emptyIndex != -1) {
+            // If there is a gap, move everything only up to it.
+            for (int r = emptyIndex; r > 0; r--) {
+                grid[r][col] = grid[r-1][col];
+            }
+        } else {
+            // If the row is full, move everything and push out the bottom block
+            for (int r = rowCount - 1; r > 0; r--) {
+                grid[r][col] = grid[r-1][col];
+            }
+        }
+        grid[0][col] = nextBlock; // Inserting a new block
+    }
+
+    private void shiftHorizontal(int row, boolean fromLeft) {
+        if (fromLeft) {
+            // Looking for emptiness from left to right
+            int emptyIndex = -1;
+            for (int c = 0; c < columnCount; c++) {
+                if (grid[row][c] == null) {
+                    emptyIndex = c;
+                    break;
+                }
+            }
+
+            if (emptyIndex != -1) {
+                // Move to the right until empty
+                for (int c = emptyIndex; c > 0; c--) {
+                    grid[row][c] = grid[row][c-1];
+                }
+            } else {
+                // Move everything to the right, pushing out the one on the far right
+                for (int c = columnCount - 1; c > 0; c--) {
+                    grid[row][c] = grid[row][c-1];
+                }
+            }
+            grid[row][0] = nextBlock;
+
+        } else {
+            // Looking for emptiness from right to left
+            int emptyIndex = -1;
+            for (int c = columnCount - 1; c >= 0; c--) {
+                if (grid[row][c] == null) {
+                    emptyIndex = c;
+                    break;
+                }
+            }
+
+            if (emptyIndex != -1) {
+                // Move to the left until empty
+                for (int c = emptyIndex; c < columnCount - 1; c++) {
+                    grid[row][c] = grid[row][c+1];
+                }
+            } else {
+                // Move everything to the left, pushing out the leftmost one
+                for (int c = 0; c < columnCount - 1; c++) {
+                    grid[row][c] = grid[row][c+1];
+                }
+            }
+            grid[row][columnCount - 1] = nextBlock;
+        }
+    }
+
     private boolean isCreatingMatch(int row, int col, BlockType type) {
-        if (row >= 2 && grid[row-1][col] == type && grid[row-2][col] == type) return true;
-        if (col >= 2 && grid[row][col-1] == type && grid[row][col-2] == type) return true;
+        if (row >= 2 && grid[row-1][col] != null && grid[row-2][col] != null &&
+                grid[row-1][col] == type && grid[row-2][col] == type) return true;
+
+        if (col >= 2 && grid[row][col-1] != null && grid[row][col-2] != null &&
+                grid[row][col-1] == type && grid[row][col-2] == type) return true;
+
         return false;
     }
 
-    // 2. Checking the status of the game (Is it finished?)
     public boolean isGameOver() {
-        // Condition: someone has scored 500 points (simplified)
         if (scoreP1 >= 500 || scoreP2 >= 500) {
             state = GameState.FINISHED;
             return true;
@@ -49,14 +144,41 @@ public class Field {
         return false;
     }
 
+    public void applyGravity() {
+        // Go through each column separately.
+        for (int c = 0; c < columnCount; c++) {
+
+            int emptySpot = rowCount - 1; // Start looking for empty space from the very bottom.
+
+            // Go along the column from bottom to top
+            for (int r = rowCount - 1; r >= 0; r--) {
+                // If we found a block (not an empty cell)
+                if (grid[r][c] != null) {
+                    // If the empty space is lower than the current block, the block "falls"
+                    if (emptySpot != r) {
+                        grid[emptySpot][c] = grid[r][c]; // Move the block down
+                        grid[r][c] = null;               // We are freeing up the old place
+                    }
+                    // Move the empty space pointer up one cell
+                    emptySpot--;
+                }
+            }
+        }
+    }
+
+    public BlockType getNextBlock() {
+        return nextBlock;
+    }
     public BlockType getBlock(int row, int col) {
         return grid[row][col];
     }
-
     public GameState getState() {
         return state;
     }
-
-    public int getScoreP1() { return scoreP1; }
-    public int getScoreP2() { return scoreP2; }
+    public int getScoreP1() {
+        return scoreP1;
+    }
+    public int getScoreP2() {
+        return scoreP2;
+    }
 }
