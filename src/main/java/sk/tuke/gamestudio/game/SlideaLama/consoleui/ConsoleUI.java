@@ -17,6 +17,30 @@ public class ConsoleUI {
             show();
             handleInput();
         }
+
+        show();
+        System.out.println("\n****************************************");
+        System.out.println("             GAME OVER!              ");
+        System.out.println("****************************************");
+
+        if (field.isFieldFull()) {
+            System.out.println("There are no cells left!");
+        } else {
+            System.out.println("One of the players has reached the point limit!");
+        }
+        int p1 = field.getScoreP1();
+        int p2 = field.getScoreP2();
+
+        System.out.println("GAME SCORE: P1 [" + p1 + "] : P2 [" + p2 + "]");
+
+        if (p1 > p2) {
+            System.out.println("RESULT: Player 1 has won! Congratulations!");
+        } else if (p2 > p1) {
+            System.out.println("RESULT: Player 2 has won! Congratulations!");
+        } else {
+            System.out.println("RESULT: Draw!");
+        }
+        System.out.println("****************************************");
     }
 
     public void show() {

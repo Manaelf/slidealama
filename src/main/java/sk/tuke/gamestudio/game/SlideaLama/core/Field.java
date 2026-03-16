@@ -142,7 +142,28 @@ public class Field {
             state = GameState.FINISHED;
             return true;
         }
+
+        boolean isFull = true;
+        for (int c = 0; c < columnCount; c++) {
+            if (grid[0][c] == null) {
+                isFull = false;
+                break;
+            }
+        }
+
+        if (isFull) {
+            state = GameState.FINISHED;
+            return true;
+        }
+
         return false;
+    }
+
+    public boolean isFieldFull() {
+        for (int c = 0; c < columnCount; c++) {
+            if (grid[0][c] == null) return false;
+        }
+        return true;
     }
 
     public void applyGravity() {
