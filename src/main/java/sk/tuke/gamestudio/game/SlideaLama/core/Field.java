@@ -51,6 +51,7 @@ public class Field {
         this.state = (state == GameState.PLAYER1_TURN) ? GameState.PLAYER2_TURN : GameState.PLAYER1_TURN;
 
         applyGravity();
+        resolveMatches();
     }
 
     private void shiftVertical(int col) {
@@ -164,6 +165,59 @@ public class Field {
                 }
             }
         }
+    }
+
+    private void resolveMatches() {
+        boolean matchFound;
+        do {
+            matchFound = false;
+            boolean[][] toRemove = new boolean[rowCount][columnCount];
+            for (int r = 0; r < rowCount; r++) {
+                for (int c = 0; c < columnCount - 2; c++) {
+                    BlockType type = grid[r][c];
+                    if (type != null && type == grid[r][c+1] && type == grid[r][c+2]) {
+                        toRemove[r][c] = true;
+                        toRemove[r][c+1] = true;
+                        toRemove[r][c+2] = true;
+                        matchFound = true;
+                    }
+                }
+            }
+
+            for (int c = 0; c < columnCount; c++) {
+                for (int r = 0; r < rowCount - 2; r++) {
+                    BlockType type = grid[r][c];
+                    if (type != null && type == grid[r+1][c] && type == grid[r+2][c]) {
+                        toRemove[r][c] = true;
+                        toRemove[r+1][c] = true;
+                        toRemove[r+2][c] = true;
+                        matchFound = true;
+                    }
+                }
+            }
+
+            if (matchFound) {
+                int blocksRemoved = 0;
+                for (int r = 0; r < rowCount; r++) {
+                    for (int c = 0; c < columnCount; c++) {
+                        if (toRemove[r][c]) {
+                            grid[r][c] = null;
+                            blocksRemoved++;
+                        }
+                    }
+                }
+
+                int points = blocksRemoved * 10;
+                if (state == GameState.PLAYER1_TURN) {
+                    scoreP1 += points;
+                } else {
+                    scoreP2 += points;
+                }
+
+                applyGravity();
+            }
+
+        } while (matchFound);
     }
 
     public BlockType getNextBlock() {
