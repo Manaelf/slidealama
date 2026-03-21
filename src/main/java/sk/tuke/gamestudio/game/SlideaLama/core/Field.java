@@ -12,42 +12,42 @@ public class Field {
     private int scoreP1 = 0;
     private int scoreP2 = 0;
 
+    private boolean firstMoveMade = false;
+
     public Field(int rowCount, int columnCount) {
         this.rowCount = rowCount;
         this.columnCount = columnCount;
         this.grid = new BlockType[rowCount][columnCount];
         this.state = GameState.PLAYER1_TURN;
-        this.nextBlock = BlockType.getRandom();
+        this.nextBlock = BlockType.getRandomWithWeights();
         generate();
     }
 
     private void generate() {
         for (int r = 0; r < rowCount; r++) {
             for (int c = 0; c < columnCount; c++) {
-                // For testing firts to rows generating empty
-                if (r < 2) {
-                    grid[r][c] = null;
-                    continue;
-                }
-
                 BlockType type;
+                // We're trying to find a block that doesn't form a “three in a row”
                 do {
-                    type = BlockType.getRandom();
+                    type = BlockType.getRandomWithWeights();
                 } while (isCreatingMatch(r, c, type));
+
                 grid[r][c] = type;
             }
         }
     }
 
     public void pushBlock(String command) {
-        char dirChar = command.charAt(0);
+        Direction dir = Direction.fromChar(command.charAt(0));
         int index = Character.getNumericValue(command.charAt(1)) - 1;
 
-        if (dirChar == 't') shiftVertical(index);
-        else if (dirChar == 'l') shiftHorizontal(index, true);
-        else if (dirChar == 'r') shiftHorizontal(index, false);
+        switch (dir) {
+            case TOP:    shiftVertical(index); break;
+            case LEFT:   shiftHorizontal(index, true); break;
+            case RIGHT:  shiftHorizontal(index, false); break;
+        }
 
-        this.nextBlock = BlockType.getRandom();
+        this.nextBlock = BlockType.getRandomWithWeights();
         this.state = (state == GameState.PLAYER1_TURN) ? GameState.PLAYER2_TURN : GameState.PLAYER1_TURN;
 
         applyGravity();
@@ -127,43 +127,29 @@ public class Field {
         }
     }
 
+    // Check whether a new block at position [row, col] will create a line
     private boolean isCreatingMatch(int row, int col, BlockType type) {
-        if (row >= 2 && grid[row-1][col] != null && grid[row-2][col] != null &&
-                grid[row-1][col] == type && grid[row-2][col] == type) return true;
-
-        if (col >= 2 && grid[row][col-1] != null && grid[row][col-2] != null &&
-                grid[row][col-1] == type && grid[row][col-2] == type) return true;
-
+        // Check horizontally (look only to the left, since we're filling in from left to right)
+        if (col >= 2) {
+            if (grid[row][col-1] == type && grid[row][col-2] == type) {
+                return true;
+            }
+        }
+        // Check vertically (look only upward, since we're filling in from top to bottom)
+        if (row >= 2) {
+            if (grid[row-1][col] == type && grid[row-2][col] == type) {
+                return true;
+            }
+        }
         return false;
     }
 
     public boolean isGameOver() {
-        if (scoreP1 >= 500 || scoreP2 >= 500) {
+        if (scoreP1 >= 1000 || scoreP2 >= 1000) {
             state = GameState.FINISHED;
             return true;
         }
-
-        boolean isFull = true;
-        for (int c = 0; c < columnCount; c++) {
-            if (grid[0][c] == null) {
-                isFull = false;
-                break;
-            }
-        }
-
-        if (isFull) {
-            state = GameState.FINISHED;
-            return true;
-        }
-
         return false;
-    }
-
-    public boolean isFieldFull() {
-        for (int c = 0; c < columnCount; c++) {
-            if (grid[0][c] == null) return false;
-        }
-        return true;
     }
 
     public void applyGravity() {
@@ -193,52 +179,67 @@ public class Field {
         do {
             matchFound = false;
             boolean[][] toRemove = new boolean[rowCount][columnCount];
+
+            // Horizontal check
             for (int r = 0; r < rowCount; r++) {
                 for (int c = 0; c < columnCount - 2; c++) {
                     BlockType type = grid[r][c];
                     if (type != null && type == grid[r][c+1] && type == grid[r][c+2]) {
-                        toRemove[r][c] = true;
-                        toRemove[r][c+1] = true;
-                        toRemove[r][c+2] = true;
+                        toRemove[r][c] = toRemove[r][c+1] = toRemove[r][c+2] = true;
                         matchFound = true;
                     }
                 }
             }
 
+            // Vertical check
             for (int c = 0; c < columnCount; c++) {
                 for (int r = 0; r < rowCount - 2; r++) {
                     BlockType type = grid[r][c];
                     if (type != null && type == grid[r+1][c] && type == grid[r+2][c]) {
-                        toRemove[r][c] = true;
-                        toRemove[r+1][c] = true;
-                        toRemove[r+2][c] = true;
+                        toRemove[r][c] = toRemove[r+1][c] = toRemove[r+2][c] = true;
                         matchFound = true;
                     }
                 }
             }
 
             if (matchFound) {
-                int blocksRemoved = 0;
+                int turnPoints = 0;
                 for (int r = 0; r < rowCount; r++) {
                     for (int c = 0; c < columnCount; c++) {
                         if (toRemove[r][c]) {
+                            turnPoints += grid[r][c].getPoints();
                             grid[r][c] = null;
-                            blocksRemoved++;
                         }
                     }
                 }
 
-                int points = blocksRemoved * 10;
-                if (state == GameState.PLAYER1_TURN) {
-                    scoreP1 += points;
-                } else {
-                    scoreP2 += points;
-                }
+                // Add points to current player (state still points to current player before flip)
+                if (state == GameState.PLAYER1_TURN) scoreP1 += turnPoints;
+                else scoreP2 += turnPoints;
 
                 applyGravity();
             }
-
         } while (matchFound);
+    }
+
+    // Method to pass the turn if time is up
+    public void skipTurn() {
+        // Change player state without making a move
+        this.state = (state == GameState.PLAYER1_TURN) ? GameState.PLAYER2_TURN : GameState.PLAYER1_TURN;
+        // Generate a new next block for the next player
+        this.nextBlock = BlockType.getRandomWithWeights();
+    }
+
+    public void setupLossScenario() {
+        this.scoreP1 = 1000;
+        this.scoreP2 = 500;
+        isGameOver();
+    }
+
+    public void setupDrawScenario() {
+        this.scoreP1 = 1000;
+        this.scoreP2 = 1000;
+        isGameOver();
     }
 
     public BlockType getNextBlock() {
