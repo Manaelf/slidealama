@@ -6,9 +6,9 @@ import java.sql.*;
 
 public class RatingServiceJDBC implements RatingService {
     private static final String DELETE_RATINGS = "DELETE FROM rating";
-    public static final String URL = ScoreServiceJDBC.URL;
-    public static final String USER = ScoreServiceJDBC.USER;
-    public static final String PASSWORD = ScoreServiceJDBC.PASSWORD;
+    public static final String URL = "jdbc:postgresql://localhost:5432/postgres";
+    public static final String USER = "postgres";
+    public static final String PASSWORD = "2GA7&nyK";
 
     private static final String INSERT = "INSERT INTO rating (game, player, rating, ratedon) VALUES (?, ?, ?, ?)";
     private static final String SELECT_AVG = "SELECT CAST(AVG(rating) AS INTEGER) FROM rating WHERE game = ?";

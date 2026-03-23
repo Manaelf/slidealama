@@ -6,10 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CommentServiceJDBC implements CommentService {
-    // Use the same connection details as in ScoreServiceJDBC
-    public static final String URL = ScoreServiceJDBC.URL;
-    public static final String USER = ScoreServiceJDBC.USER;
-    public static final String PASSWORD = ScoreServiceJDBC.PASSWORD;
+    public static final String URL = "jdbc:postgresql://localhost:5432/postgres";
+    public static final String USER = "postgres";
+    public static final String PASSWORD = "2GA7&nyK";
 
     private static final String INSERT = "INSERT INTO comment (game, player, comment, commentedon) VALUES (?, ?, ?, ?)";
     private static final String SELECT = "SELECT game, player, comment, commentedon FROM comment WHERE game = ? ORDER BY commentedon DESC";
