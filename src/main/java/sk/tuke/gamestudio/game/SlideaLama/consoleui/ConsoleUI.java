@@ -127,28 +127,37 @@ public class ConsoleUI {
 
     private void handleInputWithTimer() {
         long startTime = System.currentTimeMillis();
+        System.out.println("Time limit: " + TURN_LIMIT_SECONDS + " seconds!");
+
         try {
             while (true) {
                 long elapsed = (System.currentTimeMillis() - startTime) / 1000;
+
+                // Check if time is exceeded
                 if (elapsed >= TURN_LIMIT_SECONDS) {
-                    System.out.println("\n!!! TIME'S UP! !!!");
+                    System.out.println("\n!!! TIME'S UP! Switching turn. !!!");
                     field.skipTurn();
                     return;
                 }
+
+                // Non-blocking check for input
                 if (System.in.available() > 0) {
                     String input = reader.readLine().toLowerCase().trim();
                     if (input.equals("exit")) System.exit(0);
+
                     if (input.matches("[tlr][1-5]")) {
                         field.pushBlock(input);
                         return;
                     } else {
-                        System.out.println("Invalid command!");
+                        System.out.println("Invalid command. Try t1-5, l1-5, or r1-5:");
                     }
                 }
+
+                // Small sleep to prevent high CPU usage
                 Thread.sleep(100);
             }
         } catch (Exception e) {
-            System.out.println("Input error.");
+            System.out.println("Input error occurred.");
         }
     }
 
