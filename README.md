@@ -1,57 +1,43 @@
-# GameStudio Readme (SK)
+SlideaLama
 
-Toto je šablóna projektu GameStudio. Naklonujte si tento projekt a otvorte ho v IntelliJ Idea podľa nižšie uvedeného návodu.
-Všetky súbory ukladajte do toho projektu podľa pokynov.
+SlideaLama is a console-based logic game for two players, inspired by classic match-3 puzzles but featuring a unique row-sliding mechanic and gravity.
 
-## Klonovanie
+Players take turns pushing blocks into a 5x5 game board. 
+The goal is to align three or more identical blocks horizontally or vertically. The first player to reach 1000 points wins.
 
-Naklonujte si svoj projekt pomocou príkazu:
-
-```git clone git@git.kpi.fei.tuke.sk:...```
-
-V príkaze zameňte URL za SSH URL vášho projektu. Získate ho v GitLab-e.
-
-
-## Otvorenie projektu v IntelliJ Idea
-
-V menu Idey vyberte **File -> Open...**.
-V dialógu pre výber projektov nájdite **pom.xml** v hlavnom adresári vášho naklonovaného projektu a potvrďte.
-Potom vyberte **Open as Project**.
+ Dynamic Board: When matches are removed, blocks above them fall down due to gravity, potentially triggering chain reactions (combos).
+ Variable Block Values: Each block type has its own rarity and point value.
+ Turn Timer: Players have a limited amount of time to make a move before their turn is automatically skipped.
+ Debug Mode: A dedicated mode to test specific scenarios such as victory, draws, or board filling.
 
 
-## Nastavenie projektu
+Launching the Game
 
-V adresári `src/main/java/sk.tuke.gamestudio.game` si vytvorte nový balík pomenovaný podľa názvu vašej hry.
-Všetky súbory a adresáre vašej hry umiestnite do tohto balíka (napr. `Main.java`, `core`, `consoleui`, atď.).
-Keď budete vytvárať Unit testy, umiestnite ich do balíka `src/test/java/sk.tuke.gamestudio.game.[yourGame]`.
+Run the Main class. You will be prompted to choose a mode:
+ 1. Normal Mode - Standard gameplay.
+ 2. Debug Mode - Quick access to specific test scenarios.
 
-Používajte [štandardnú štruktúru Maven projektov](https://maven.apache.org/guides/introduction/introduction-to-the-standard-directory-layout.html) a odporúčanú adresárovú štruktúru projektu GameStudio.
+Controls
 
+Commands are entered in the format [direction][number]:
+ t1-5 (Top) - Push a block from the top into columns 1-5.
+ l1-5 (Left) - Push a block from the left into rows 1-5.
+ r1-5 (Right) - Push a block from the right into rows 1-5.
+ exit - Close the game.
 
-# GameStudio Readme (EN)
-
-Template for your GameStudio project. Clone the project and open in IntelliJ Idea. Place all your files into this project.
-
-## Cloning
-
-Clone your project using:
-
-```git clone git@git.kpi.fei.tuke.sk:...```
-
-Replace the url with your project's SSH url. You can get it in GitLab.
-
-
-## Opening in IntelliJ Idea
-
-In Idea, select **File -> Open...** from the menu.
-In the file selection dialog, find and open your project's **pom.xml**.
-Then select **Open as Project**.
+Block Value Table
+| Symbol | Type  | Points | Probability |
+|    L   | LAMA  | 100    | 5%          |
+|    S   | SUN   | 70     | 10%         |
+|    M   | MOON  | 40     | 15%         |
+|    F   | FRUIT | 30     | 20%         |
+|    X   | SNAKE | 20     | 25%         |
+|    B   | BELL  | 10     | 25%         |
 
 
-## Project Setup
 
-Create a new package inside `src/main/java/sk.tuke.gamestudio.game`. Name it after your game.
-Place all files and packages related to your game (e.g. `Main.java`, `core`, `consoleui`, etc.) into this package.
-When creating new unit tests, place them into the `src/test/java/sk.tuke.gamestudio.game.[yourGame]` package.
+Scoring Rules
 
-Use the [standard Maven directory layout](https://maven.apache.org/guides/introduction/introduction-to-the-standard-directory-layout.html) and GameStudio recommended directory structure when adding more classes.
+Points are awarded immediately after a move and subsequent gravity shifts. 
+If a move results in multiple matches (combos), the points are accumulated. 
+The total points for a single match are calculated as the sum of the values of all removed blocks.
