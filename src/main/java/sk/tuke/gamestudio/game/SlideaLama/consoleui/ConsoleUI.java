@@ -1,5 +1,6 @@
 package sk.tuke.gamestudio.game.SlideaLama.consoleui;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import sk.tuke.gamestudio.entity.Comment;
 import sk.tuke.gamestudio.entity.Rating;
 import sk.tuke.gamestudio.entity.Score;
@@ -19,10 +20,14 @@ public class ConsoleUI {
     private final int TURN_LIMIT_SECONDS = 30;
     private final String GAME_NAME = "SlideaLama";
 
-    // Инициализация сервисов
-    private final ScoreService scoreService = new ScoreServiceJDBC();
-    private final CommentService commentService = new CommentServiceJDBC();
-    private final RatingService ratingService = new RatingServiceJDBC();
+    @Autowired
+    private ScoreService scoreService;
+
+    @Autowired
+    private CommentService commentService;
+
+    @Autowired
+    private RatingService ratingService;
 
     public ConsoleUI(Field field) {
         this.field = field;
@@ -38,6 +43,10 @@ public class ConsoleUI {
         printGameResult();
 
         handleDatabaseInteraction();
+    }
+
+    public Field getField() {
+        return field;
     }
 
     private void printGameResult() {
@@ -89,7 +98,7 @@ public class ConsoleUI {
 
         } catch (Exception e) {
             System.err.println("Error while interacting with database:");
-            e.printStackTrace(); // Это выведет полную цепочку ошибок в консоль красным цветом
+            e.printStackTrace();
         }
     }
 
@@ -133,14 +142,12 @@ public class ConsoleUI {
             while (true) {
                 long elapsed = (System.currentTimeMillis() - startTime) / 1000;
 
-                // Check if time is exceeded
                 if (elapsed >= TURN_LIMIT_SECONDS) {
                     System.out.println("\n!!! TIME'S UP! Switching turn. !!!");
                     field.skipTurn();
                     return;
                 }
 
-                // Non-blocking check for input
                 if (System.in.available() > 0) {
                     String input = reader.readLine().toLowerCase().trim();
                     if (input.equals("exit")) System.exit(0);
@@ -153,7 +160,6 @@ public class ConsoleUI {
                     }
                 }
 
-                // Small sleep to prevent high CPU usage
                 Thread.sleep(100);
             }
         } catch (Exception e) {
