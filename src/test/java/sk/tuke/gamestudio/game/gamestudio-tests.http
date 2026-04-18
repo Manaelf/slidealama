@@ -1,0 +1,45 @@
+# Тест 1: Добавить результат игры (POST)
+POST http://localhost:8080/api/score
+Content-Type: application/json
+
+{
+  "game": "SlideaLama",
+  "player": "TestPlayer",
+  "points": 100,
+  "playedOn": "2026-04-13T12:00:00.000+00:00"
+}
+
+###
+
+# Тест 2: Получить топ 10 результатов по игре (GET)
+GET http://localhost:8080/api/score/SlideaLama
+
+###
+
+# Тест 3: Добавить комментарий (POST)
+POST http://localhost:8080/api/comment
+Content-Type: application/json
+
+{
+  "game": "SlideaLama",
+  "player": "TestPlayer",
+  "comment": "Great game, very fun!",
+  "commentedOn": "2026-04-13T12:00:00.000+00:00"
+}
+
+###
+
+# Тест 4: Добавить рейтинг и получить средний (POST + GET)
+POST http://localhost:8080/api/rating
+Content-Type: application/json
+
+{
+  "game": "SlideaLama",
+  "player": "TestPlayer",
+  "rating": 5,
+  "ratedOn": "2026-04-13T12:00:00.000+00:00"
+}
+
+###
+
+GET http://localhost:8080/api/rating/average/SlideaLama

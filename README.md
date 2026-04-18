@@ -41,3 +41,5 @@ Scoring Rules
 Points are awarded immediately after a move and subsequent gravity shifts. 
 If a move results in multiple matches (combos), the points are accumulated. 
 The total points for a single match are calculated as the sum of the values of all removed blocks.
+
+Video pre druhú obhajobu - https://youtu.be/vxP-QtQ88KI
