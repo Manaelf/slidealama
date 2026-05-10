@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Slide-a-Lama</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
+            padding: 20px;
+        }
+
+        h1 { color: #333; }
+        h3 { color: #444; margin-top: 20px; }
+
+        .scores { margin: 10px auto; font-size: 18px; }
+        .info   { margin: 8px auto; font-size: 16px; color: #555; }
+
+        /* кнопки сверху */
+        .btn-top {
+            display: inline-block;
+            width: 80px;
+            height: 30px;
+            line-height: 30px;
+            background-color: #4a90d9;
+            color: white;
+            text-decoration: none;
+            font-size: 13px;
+            border-radius: 4px;
+            margin: 2px;
+        }
+        .btn-top:hover { background-color: #357abd; }
+
+        /* обёртка поля */
+        .board-wrapper {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin: 10px auto;
+        }
+
+        .side-buttons { display: flex; flex-direction: column; gap: 4px; }
+
+        .btn-side {
+            display: block;
+            width: 35px;
+            height: 80px;
+            line-height: 80px;
+            background-color: #4a90d9;
+            color: white;
+            text-decoration: none;
+            font-size: 13px;
+            border-radius: 4px;
+        }
+        .btn-side:hover { background-color: #357abd; }
+
+        /* игровая сетка */
+        table { margin: 0 auto; border-collapse: collapse; }
+
+        td {
+            width: 80px;
+            height: 80px;
+            text-align: center;
+            vertical-align: middle;
+            font-size: 26px;
+            font-weight: bold;
+            border: 2px solid #999;
+            background-color: #fff;
+        }
+
+        /* game over */
+        .gameover {
+            margin: 15px auto;
+            padding: 15px;
+            background-color: #ffdddd;
+            border: 2px solid #cc0000;
+            border-radius: 8px;
+            width: 320px;
+        }
+        .gameover h2 { color: #cc0000; }
+
+        .btn-new {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 20px;
+            background-color: #5cb85c;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
+        /* имя игрока */
+        .player-form {
+            margin: 10px auto;
+            font-size: 15px;
+        }
+
+        .player-form input[type="text"] {
+            padding: 5px 10px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .player-form button {
+            padding: 5px 12px;
+            background-color: #4a90d9;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* секции снизу */
+        .bottom-section {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .section-box {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 15px 20px;
+            min-width: 250px;
+            max-width: 350px;
+        }
+
+        .section-box h3 { margin-top: 0; }
+
+        /* таблицы */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .data-table th {
+            background-color: #ddd;
+            padding: 6px 10px;
+            border: 1px solid #ccc;
+            text-align: left;
+        }
+
+        .data-table td {
+            width: auto;
+            height: auto;
+            padding: 5px 10px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+            font-weight: normal;
+            text-align: left;
+        }
+
+        /* форма комментария */
+        .comment-form { margin-top: 10px; }
+
+        .comment-form textarea {
+            width: 100%;
+            height: 60px;
+            padding: 6px;
+            font-size: 13px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+
+        .comment-form button {
+            margin-top: 6px;
+            padding: 6px 14px;
+            background-color: #4a90d9;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* рейтинг — звёздочки */
+        .stars { font-size: 28px; }
+
+        .star-link {
+            text-decoration: none;
+            color: #ccc;
+        }
+
+        .star-link.active { color: #f5a623; }
+        .star-link:hover  { color: #f5a623; }
+
+        .avg-rating { font-size: 16px; margin-top: 6px; }
+        .my-rating  { font-size: 14px; color: #555; margin-top: 4px; }
+
+        .no-data { color: #999; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<h1>Slide-a-Lama</h1>
+
+
+<div style="position: fixed; top: 15px; left: 15px; background: #fff;
+            border: 1px solid #ccc; border-radius: 8px; padding: 10px 14px;
+            font-size: 13px; font-family: Arial, sans-serif;">
+    <b style="display:block; margin-bottom:6px; text-align:center; color:#333;">Points</b>
+
+    <div style="display:flex; align-items:center; gap:4px; margin:3px 0;">
+        <img src="/images/lama.png"  width="28" height="28" style="border-radius:4px;"/>
+        <img src="/images/lama.png"  width="28" height="28" style="border-radius:4px;"/>
+        <img src="/images/lama.png"  width="28" height="28" style="border-radius:4px;"/>
+        <span style="margin-left:6px; font-weight:bold;">100 pts</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:4px; margin:3px 0;">
+        <img src="/images/sun.png"   width="28" height="28" style="border-radius:4px;"/>
+        <img src="/images/sun.png"   width="28" height="28" style="border-radius:4px;"/>
+        <img src="/images/sun.png"   width="28" height="28" style="border-radius:4px;"/>
+        <span style="margin-left:6px; font-weight:bold;">70 pts</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:4px; margin:3px 0;">
+        <img src="/images/moon.png"  width="28" height="28" style="border-radius:4px;"/>
+        <img src="/images/moon.png"  width="28" height="28" style="border-radius:4px;"/>
+        <img src="/images/moon.png"  width="28" height="28" style="border-radius:4px;"/>
+        <span style="margin-left:6px; font-weight:bold;">40 pts</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:4px; margin:3px 0;">
+        <img src="/images/fruit.png" width="28" height="28" style="border-radius:4px;"/>
+        <img src="/images/fruit.png" width="28" height="28" style="border-radius:4px;"/>
+        <img src="/images/fruit.png" width="28" height="28" style="border-radius:4px;"/>
+        <span style="margin-left:6px; font-weight:bold;">30 pts</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:4px; margin:3px 0;">
+        <img src="/images/snake.png" width="28" height="28" style="border-radius:4px;"/>
+        <img src="/images/snake.png" width="28" height="28" style="border-radius:4px;"/>
+        <img src="/images/snake.png" width="28" height="28" style="border-radius:4px;"/>
+        <span style="margin-left:6px; font-weight:bold;">20 pts</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:4px; margin:3px 0;">
+        <img src="/images/bell.png"  width="28" height="28" style="border-radius:4px;"/>
+        <img src="/images/bell.png"  width="28" height="28" style="border-radius:4px;"/>
+        <img src="/images/bell.png"  width="28" height="28" style="border-radius:4px;"/>
+        <span style="margin-left:6px; font-weight:bold;">10 pts</span>
+    </div>
+</div>
+
+<!-- имя игрока -->
+<div class="player-form">
+    <span th:if="${!currentPlayer.isEmpty()}">
+        Playing as: <b th:text="${currentPlayer}"></b> &nbsp;
+    </span>
+    <form th:action="@{/slidealama}" method="get" style="display:inline;">
+        <input type="text" name="player" placeholder="Enter your name" />
+        <button type="submit">Set name</button>
+    </form>
+</div>
+
+<div class="scores">
+    Player 1: <b th:text="${scoreP1}">0</b> &nbsp;|&nbsp; Player 2: <b th:text="${scoreP2}">0</b>
+</div>
+
+<div class="info">
+    Current turn: <b th:text="${state}">P1</b>
+    &nbsp;&nbsp;|&nbsp;&nbsp;
+    Next block:
+    <img th:if="${nextBlock != ''}"
+         th:src="@{'/images/' + ${nextBlock} + '.png'}"
+         width="40" height="40"
+         style="border-radius: 4px; vertical-align: middle;"
+         th:alt="${nextBlock}"/>
+    <span th:if="${nextBlock == ''}">?</span>
+</div>
+
+<!-- кнопки сверху -->
+<div>
+    <a th:href="@{/slidealama(command='t1')}" class="btn-top">▼ 1</a>
+    <a th:href="@{/slidealama(command='t2')}" class="btn-top">▼ 2</a>
+    <a th:href="@{/slidealama(command='t3')}" class="btn-top">▼ 3</a>
+    <a th:href="@{/slidealama(command='t4')}" class="btn-top">▼ 4</a>
+    <a th:href="@{/slidealama(command='t5')}" class="btn-top">▼ 5</a>
+</div>
+
+<!-- [left] [board] [right] -->
+<div class="board-wrapper">
+    <div class="side-buttons">
+        <a th:href="@{/slidealama(command='l1')}" class="btn-side">▶ 1</a>
+        <a th:href="@{/slidealama(command='l2')}" class="btn-side">▶ 2</a>
+        <a th:href="@{/slidealama(command='l3')}" class="btn-side">▶ 3</a>
+        <a th:href="@{/slidealama(command='l4')}" class="btn-side">▶ 4</a>
+        <a th:href="@{/slidealama(command='l5')}" class="btn-side">▶ 5</a>
+    </div>
+
+    <table>
+        <tr th:each="row : ${board}">
+            <td th:each="cell : ${row}">
+                <img th:if="${cell != ''}"
+                     th:src="|/images/${cell}.png|"
+                     width="70" height="70"
+                     style="border-radius: 6px;"
+                     th:alt="${cell}"/>
+                <img th:if="${cell == ''}"
+                     src="/images/empty.png"
+                     width="70" height="70"
+                     style="border-radius: 6px;"/>
+            </td>
+        </tr>
+    </table>
+
+    <div class="side-buttons">
+        <a th:href="@{/slidealama(command='r1')}" class="btn-side">1 ◀</a>
+        <a th:href="@{/slidealama(command='r2')}" class="btn-side">2 ◀</a>
+        <a th:href="@{/slidealama(command='r3')}" class="btn-side">3 ◀</a>
+        <a th:href="@{/slidealama(command='r4')}" class="btn-side">4 ◀</a>
+        <a th:href="@{/slidealama(command='r5')}" class="btn-side">5 ◀</a>
+    </div>
+</div>
+
+<!-- game over -->
+<div class="gameover" th:if="${gameOver}">
+    <h2>Game Over!</h2>
+    <p th:if="${scoreP1 > scoreP2}">Player 1 wins!</p>
+    <p th:if="${scoreP2 > scoreP1}">Player 2 wins!</p>
+    <p th:if="${scoreP1 == scoreP2}">Draw!</p>
+    <a th:href="@{/slidealama(command='new')}" class="btn-new">New Game</a>
+</div>
+
+<!-- секции: топ скоры / рейтинг / комментарии -->
+<div class="bottom-section">
+
+    <!-- топ скоры -->
+    <div class="section-box">
+        <h3>Top Scores</h3>
+        <p class="no-data" th:if="${#lists.isEmpty(topScores)}">No scores yet.</p>
+        <table class="data-table" th:if="${!#lists.isEmpty(topScores)}">
+            <tr><th>#</th><th>Player</th><th>Points</th></tr>
+            <tr th:each="s, i : ${topScores}">
+                <td th:text="${i.index + 1}">1</td>
+                <td th:text="${s.player}">Player</td>
+                <td th:text="${s.points}">0</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- рейтинг -->
+    <div class="section-box">
+        <h3>Rating</h3>
+
+        <div class="avg-rating">
+            Average rating: <b th:text="${avgRating}">0</b> / 5
+        </div>
+
+        <div class="my-rating" th:if="${!currentPlayer.isEmpty()}">
+            Your rating: <b th:text="${playerRating > 0 ? playerRating : 'not rated'}">-</b>
+        </div>
+
+        <!-- звёздочки для выставления рейтинга -->
+        <div class="stars" th:if="${!currentPlayer.isEmpty()}">
+            <a th:href="@{/slidealama(rating=1)}" class="star-link" th:classappend="${playerRating >= 1 ? 'active' : ''}">★</a>
+            <a th:href="@{/slidealama(rating=2)}" class="star-link" th:classappend="${playerRating >= 2 ? 'active' : ''}">★</a>
+            <a th:href="@{/slidealama(rating=3)}" class="star-link" th:classappend="${playerRating >= 3 ? 'active' : ''}">★</a>
+            <a th:href="@{/slidealama(rating=4)}" class="star-link" th:classappend="${playerRating >= 4 ? 'active' : ''}">★</a>
+            <a th:href="@{/slidealama(rating=5)}" class="star-link" th:classappend="${playerRating >= 5 ? 'active' : ''}">★</a>
+        </div>
+        <p class="no-data" th:if="${currentPlayer.isEmpty()}">Set your name to rate the game.</p>
+    </div>
+
+    <!-- комментарии -->
+    <div class="section-box">
+        <h3>Comments</h3>
+
+        <!-- форма добавления комментария -->
+        <div th:if="${!currentPlayer.isEmpty()}">
+            <form class="comment-form" th:action="@{/slidealama}" method="get">
+                <textarea name="comment" placeholder="Write a comment..."></textarea>
+                <br/>
+                <button type="submit">Send</button>
+            </form>
+        </div>
+        <p class="no-data" th:if="${currentPlayer.isEmpty()}">Set your name to comment.</p>
+
+        <!-- список комментариев -->
+        <p class="no-data" th:if="${#lists.isEmpty(comments)}">No comments yet.</p>
+        <table class="data-table" th:if="${!#lists.isEmpty(comments)}">
+            <tr><th>Player</th><th>Comment</th></tr>
+            <tr th:each="c : ${comments}">
+                <td th:text="${c.player}">Player</td>
+                <td th:text="${c.comment}">Comment</td>
+            </tr>
+        </table>
+    </div>
+
+</div>
+
+</body>
+</html>
