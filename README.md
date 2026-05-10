@@ -43,3 +43,5 @@ If a move results in multiple matches (combos), the points are accumulated.
 The total points for a single match are calculated as the sum of the values of all removed blocks.
 
 Video pre druhú obhajobu - https://youtu.be/vxP-QtQ88KI
+
+Video pre tretiu obhajobu - https://youtu.be/M7UXP7fK2e4
