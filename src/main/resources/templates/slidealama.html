@@ -261,6 +261,7 @@
     Player 1: <b th:text="${scoreP1}">0</b> &nbsp;|&nbsp; Player 2: <b th:text="${scoreP2}">0</b>
 </div>
 
+<!-- подставление изображений в блоки -->
 <div class="info">
     Current turn: <b th:text="${state}">P1</b>
     &nbsp;&nbsp;|&nbsp;&nbsp;
@@ -372,9 +373,13 @@
 
         <!-- форма добавления комментария -->
         <div th:if="${!currentPlayer.isEmpty()}">
-            <form class="comment-form" th:action="@{/slidealama}" method="get">
-                <textarea name="comment" placeholder="Write a comment..."></textarea>
-                <br/>
+            <form class="comment-form" th:action="@{/slidealama/comment}" method="post">
+    <textarea name="comment" placeholder="Write a comment..."
+              maxlength="200" id="commentArea"
+              onkeyup="document.getElementById('charCount').textContent = 200 - this.value.length"></textarea>
+                <div style="font-size: 12px; color: #999; text-align: right;">
+                    <span id="charCount">200</span> characters left
+                </div>
                 <button type="submit">Send</button>
             </form>
         </div>
