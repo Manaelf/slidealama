@@ -44,4 +44,13 @@ The total points for a single match are calculated as the sum of the values of a
 
 Video pre druhú obhajobu - https://youtu.be/vxP-QtQ88KI
 
-Video pre tretiu obhajobu - https://youtu.be/M7UXP7fK2e4м авыавыавыа
+Video pre tretiu obhajobu - https://youtu.be/M7UXP7fK2e4м
+
+
+Работа с университетским GitLab (origin):
+Забрать код: git pull origin master
+Сдать проект (отправить код): git push origin master
+
+Работа с совместным GitHub (shared):
+Забрать код: git pull shared master
+Отдать код: git push shared master
